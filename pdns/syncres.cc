@@ -522,11 +522,15 @@ int SyncRes::doResolve(const DNSName &qname, const QType &qtype, vector<DNSRecor
         }
         else {
           const vector<ComboAddress>& servers = iter->second.d_servers;
+          // Decide whether the query should use recursion from zones
+          // configured to forward recursively
+          bool sendRDQuery = iter->second.shouldRecurse();
           const ComboAddress remoteIP = servers.front();
-          LOG(prefix<<qname<<": forwarding query to hardcoded nameserver '"<< remoteIP.toStringWithPort()<<"' for zone '"<<authname<<"'"<<endl);
+          LOG(prefix<<qname<<": forwarding " << (sendRDQuery ? "" : "non-") << "recursive query"
+              " to hardcoded nameserver '"<< remoteIP.toStringWithPort()<<"' for zone '"<<authname<<"'"<<endl);
 
           boost::optional<Netmask> nm;
-          res=asyncresolveWrapper(remoteIP, d_doDNSSEC, qname, qtype.getCode(), false, false, &d_now, nm, &lwr);
+          res=asyncresolveWrapper(remoteIP, d_doDNSSEC, qname, qtype.getCode(), false, sendRDQuery, &d_now, nm, &lwr);
           // filter out the good stuff from lwr.result()
           if (res == 1) {
             for(const auto& rec : lwr.d_records) {
