@@ -2554,7 +2554,7 @@ BOOST_AUTO_TEST_CASE(test_forward_zone_recurse_nord) {
   sr->setAsyncCallback([forwardedNS](const ComboAddress& ip, const DNSName& domain, int type, bool doTCP, bool sendRDQuery, int EDNS0Level, struct timeval* now, boost::optional<Netmask>& srcmask, boost::optional<const ResolveContext&> context, std::shared_ptr<RemoteLogger> outgoingLogger, LWResult* res) {
 
       if (ip == forwardedNS) {
-        BOOST_CHECK_EQUAL(sendRDQuery, false);
+        BOOST_CHECK_EQUAL(sendRDQuery, true);
 
         setLWResult(res, 0, true, false, true);
         addRecordToLW(res, domain, QType::A, "192.0.2.42");
